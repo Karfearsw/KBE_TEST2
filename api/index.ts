@@ -1,7 +1,7 @@
 import app from "../OTP/server/index";
 
 export const config = {
-  runtime: "nodejs20.x",
+  runtime: "nodejs",
 };
 
 export default app;
