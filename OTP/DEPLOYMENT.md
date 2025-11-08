@@ -39,6 +39,12 @@ Configure the deployment with the same values you use locally:
 These variables must be added in the Vercel dashboard under **Settings → Environment
 Variables** for the project. Re-deploy after saving changes.
 
+Vercel already sets `NODE_ENV=production` for build and runtime environments, so
+omit the variable entirely unless you have a compelling reason to override it.
+Leaving `NODE_ENV=development` in your production secrets forces Express to try
+booting the Vite development middleware, which is incompatible with the
+serverless function.
+
 ## 4. Database persistence
 
 Users, leads, activities, and related CRM records are inserted via the
@@ -56,8 +62,27 @@ Express app. On the Vercel platform `process.env.VERCEL` is set, so
 static assets directly from `server/public` inside the function. No additional
 routing rules are necessary for client-side navigation.
 
+If you deploy the same build to a host that _does_ run a long-lived Node
+process, the Express bootstrap binds to `process.env.PORT` (falling back to
+`5000` locally). That port number is ignored on Vercel because the handler is
+invoked per-request rather than by opening a socket.
+
 ## 6. Limitations
 
 The WebSocket bootstrap is disabled in serverless mode, so any realtime features
 that rely on the long-lived socket will not be available on Vercel. For those
 features you will need a separate service that supports persistent connections.
+
+## 7. Troubleshooting build failures
+
+- **"No Next.js version detected"** – ensure you are using the repository root as
+  the project directory. The included `vercel.json` already switches into the
+  `OTP/` folder for install/build commands and disables framework auto-detection.
+- **"Unsupported runtime value"** – the `api/index.ts` function is configured for
+  the standard `nodejs` runtime. If you see this error, double-check that you
+  have not overridden the runtime setting in the Vercel dashboard.
+- **Build succeeds but deployment returns 404** – confirm that `npm run build`
+  finished both the Vite client build and the `esbuild` server bundle. The
+  packaged function uploads `OTP/server/public/**` and `OTP/dist/**`; deleting
+  either output directory before the deployment completes will result in an
+  empty bundle.

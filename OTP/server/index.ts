@@ -67,9 +67,9 @@ if (isVercel) {
 
     setupWebsocketServer(server);
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
+    // Bind to whatever PORT the platform provides (Render, Railway, Fly.io, etc.)
+    // and fall back to 5000 for local development. Vercel never executes this
+    // branch—the function export above handles requests without opening a port.
     const port = Number(process.env.PORT) || 5000;
     server.listen(
       {
