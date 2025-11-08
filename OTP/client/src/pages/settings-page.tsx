@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -265,18 +264,22 @@ export default function SettingsPage() {
   };
 
   // Get user initials for avatar
-  const getUserInitials = (name: string) => {
-    return name.split(' ')
-      .map(part => part[0])
-      .join('')
+  const getUserInitials = (name?: string | null) => {
+    if (!name) {
+      return "--";
+    }
+
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
 
   return (
     <div className="flex h-screen bg-neutral-50">
-      <Sidebar />
-      
       <main className="main-content flex-1 min-h-screen p-4 md:ml-64 md:p-6 overflow-auto">
         {/* Page Header */}
         <div className="mb-6">

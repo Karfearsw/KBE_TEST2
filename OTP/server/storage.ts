@@ -23,7 +23,7 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import { db } from "./db";
-import { eq, and, gte, desc, asc, sql, like, or, inArray, isNull } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, like, or, inArray, type AnyColumn } from "drizzle-orm";
 import { generateLeadId, extractLeadNumber, getCurrentYearPrefix } from "./utils/lead-utils";
 import { pool } from "./db";
 import pgSessionFactory from "connect-pg-simple";
@@ -168,69 +168,48 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getLeads(filters: LeadFilters = {}): Promise<Lead[]> {
-    let query = db.select().from(leads);
-    
-    // Apply filters
+    const conditions: any[] = [];
+
     if (filters.status && filters.status.length > 0) {
-      query = query.where(inArray(leads.status, filters.status));
+      conditions.push(inArray(leads.status, filters.status));
     }
-    
+
     if (filters.assignedToUserId) {
-      query = query.where(eq(leads.assignedToUserId, filters.assignedToUserId));
+      conditions.push(eq(leads.assignedToUserId, filters.assignedToUserId));
     }
-    
-    // Filter for "created by" user ID
+
     if (filters.createdByUserId) {
       try {
-        console.log('Filtering by createdByUserId:', filters.createdByUserId);
-        
-        // Look for activity records first (for recently added leads)
         const creationActivities = await db
-          .select()
+          .select({ targetId: activities.targetId })
           .from(activities)
           .where(and(
             eq(activities.userId, filters.createdByUserId),
-            eq(activities.actionType, 'create'),
-            eq(activities.targetType, 'lead')
+            eq(activities.actionType, "create"),
+            eq(activities.targetType, "lead")
           ));
-          
-        console.log(`Found ${creationActivities.length} lead creation activities for user ${filters.createdByUserId}`);
-        
-        // Also look for leads directly created by this user for backward compatibility
-        // This helps find leads that might have been created before we started tracking activities
-        const userLeads = await db
-          .select({ id: leads.id })
-          .from(leads)
-          .where(eq(leads.createdByUserId, filters.createdByUserId))
-          .execute();
-          
-        console.log(`Found ${userLeads.length} leads with createdByUserId = ${filters.createdByUserId}`);
-        
-        // Combine both sources of lead IDs
-        const leadIds = [
-          ...creationActivities.map(activity => activity.targetId),
-          ...userLeads.map(lead => lead.id)
-        ];
-        
-        // Remove duplicates
-        const uniqueLeadIds = [...new Set(leadIds)];
-        console.log(`Total unique leads created by user ${filters.createdByUserId}:`, uniqueLeadIds.length);
-        
-        if (uniqueLeadIds.length > 0) {
-          // Filter to only these leads
-          query = query.where(inArray(leads.id, uniqueLeadIds));
-        } else {
-          console.log('No leads created by this user, returning empty result');
+
+        const uniqueLeadIds = Array.from(
+          new Set(
+            creationActivities
+              .map((activity) => activity.targetId)
+              .filter((id): id is number => typeof id === "number")
+          )
+        );
+
+        if (uniqueLeadIds.length === 0) {
           return [];
         }
+
+        conditions.push(inArray(leads.id, uniqueLeadIds));
       } catch (error) {
-        console.error('Error in createdByUserId filter:', error);
+        console.error("Error in createdByUserId filter:", error);
       }
     }
-    
+
     if (filters.search) {
       const searchTerm = `%${filters.search}%`;
-      query = query.where(
+      conditions.push(
         or(
           like(leads.propertyAddress, searchTerm),
           like(leads.ownerName, searchTerm),
@@ -239,29 +218,37 @@ export class DatabaseStorage implements IStorage {
         )
       );
     }
-    
-    // Apply sorting
-    if (filters.sortBy) {
-      const sortColumn = leads[filters.sortBy as keyof typeof leads] || leads.createdAt;
-      if (filters.sortOrder === 'asc') {
-        query = query.orderBy(asc(sortColumn));
-      } else {
-        query = query.orderBy(desc(sortColumn));
-      }
-    } else {
-      query = query.orderBy(desc(leads.createdAt));
+
+    let query = db.select().from(leads) as any;
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
-    
-    // Apply pagination
-    if (filters.limit) {
-      query = query.limit(filters.limit);
+
+    const sortColumnMap: Record<string, AnyColumn> = {
+      createdAt: leads.createdAt,
+      updatedAt: leads.updatedAt,
+      status: leads.status,
+      ownerName: leads.ownerName,
+      propertyAddress: leads.propertyAddress,
+      city: leads.city,
+      state: leads.state,
+    };
+
+    const sortColumn = sortColumnMap[filters.sortBy ?? ""] ?? leads.createdAt;
+    let finalQuery = filters.sortOrder === "asc"
+      ? query.orderBy(asc(sortColumn))
+      : query.orderBy(desc(sortColumn));
+
+    if (typeof filters.limit === "number") {
+      finalQuery = finalQuery.limit(filters.limit);
     }
-    
-    if (filters.offset) {
-      query = query.offset(filters.offset);
+
+    if (typeof filters.offset === "number") {
+      finalQuery = finalQuery.offset(filters.offset);
     }
-    
-    return await query;
+
+    return finalQuery.execute();
   }
   
   async createLead(insertLead: InsertLead): Promise<Lead> {
@@ -370,17 +357,23 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getCalls(leadId?: number, userId?: number): Promise<Call[]> {
-    let query = db.select().from(calls);
-    
+    const conditions: any[] = [];
+
     if (leadId) {
-      query = query.where(eq(calls.leadId, leadId));
+      conditions.push(eq(calls.leadId, leadId));
     }
-    
+
     if (userId) {
-      query = query.where(eq(calls.userId, userId));
+      conditions.push(eq(calls.userId, userId));
     }
-    
-    return await query.orderBy(desc(calls.callTime));
+
+    let query = db.select().from(calls) as any;
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return query.orderBy(desc(calls.callTime)).execute();
   }
   
   async createCall(insertCall: InsertCall): Promise<Call> {
@@ -413,25 +406,31 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getScheduledCalls(filters: ScheduledCallFilters = {}): Promise<ScheduledCall[]> {
-    let query = db.select().from(scheduledCalls);
-    
+    const conditions: any[] = [];
+
     if (filters.status) {
-      query = query.where(eq(scheduledCalls.status, filters.status));
+      conditions.push(eq(scheduledCalls.status, filters.status));
     }
-    
+
     if (filters.userId) {
-      query = query.where(eq(scheduledCalls.assignedCallerId, filters.userId));
+      conditions.push(eq(scheduledCalls.assignedCallerId, filters.userId));
     }
-    
+
     if (filters.startDate) {
-      query = query.where(gte(scheduledCalls.scheduledTime, filters.startDate));
+      conditions.push(gte(scheduledCalls.scheduledTime, filters.startDate));
     }
-    
+
     if (filters.endDate) {
-      query = query.where(sql`${scheduledCalls.scheduledTime} <= ${filters.endDate}`);
+      conditions.push(lte(scheduledCalls.scheduledTime, filters.endDate));
     }
-    
-    return await query.orderBy(asc(scheduledCalls.scheduledTime));
+
+    let query = db.select().from(scheduledCalls) as any;
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return query.orderBy(asc(scheduledCalls.scheduledTime)).execute();
   }
   
   async createScheduledCall(insertScheduledCall: InsertScheduledCall): Promise<ScheduledCall> {
@@ -537,25 +536,33 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getTimesheets(filters: TimesheetFilters = {}): Promise<Timesheet[]> {
-    let query = db.select().from(timesheets);
-    
+    const conditions: any[] = [];
+
     if (filters.userId) {
-      query = query.where(eq(timesheets.userId, filters.userId));
+      conditions.push(eq(timesheets.userId, filters.userId));
     }
-    
+
     if (filters.startDate) {
-      query = query.where(gte(timesheets.date, filters.startDate));
+      const startDate = filters.startDate.toISOString().slice(0, 10);
+      conditions.push(gte(timesheets.date, startDate));
     }
-    
+
     if (filters.endDate) {
-      query = query.where(sql`${timesheets.date} <= ${filters.endDate}`);
+      const endDate = filters.endDate.toISOString().slice(0, 10);
+      conditions.push(lte(timesheets.date, endDate));
     }
-    
+
     if (filters.approved !== undefined) {
-      query = query.where(eq(timesheets.approved, filters.approved));
+      conditions.push(eq(timesheets.approved, filters.approved));
     }
-    
-    return await query.orderBy(desc(timesheets.date));
+
+    let query = db.select().from(timesheets) as any;
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return query.orderBy(desc(timesheets.date)).execute();
   }
   
   async createTimesheet(insertTimesheet: InsertTimesheet): Promise<Timesheet> {

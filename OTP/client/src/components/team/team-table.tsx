@@ -30,11 +30,16 @@ interface TeamTableProps {
 
 export function TeamTable({ teamMembers, isLoading, timeframe }: TeamTableProps) {
   // Helper to get initials from name
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string | null) => {
+    if (!name) {
+      return "--";
+    }
+
     return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
@@ -164,10 +169,10 @@ export function TeamTable({ teamMembers, isLoading, timeframe }: TeamTableProps)
                   <TableRow key={member.id} className="hover:bg-neutral-50">
                     <TableCell className="flex items-center">
                       <div className="flex-shrink-0 h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center">
-                        <span className="text-xs font-medium">{getInitials(member.name)}</span>
+                        <span className="text-xs font-medium">{getInitials(member.name ?? member.username)}</span>
                       </div>
                       <div className="ml-3">
-                        <div className="font-medium text-neutral-900">{member.name}</div>
+                        <div className="font-medium text-neutral-900">{member.name ?? member.username}</div>
                         <div className="flex items-center text-neutral-500 text-xs">
                           <MailIcon className="h-3 w-3 mr-1" />
                           <span>{member.email}</span>

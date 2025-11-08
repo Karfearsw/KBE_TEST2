@@ -7,6 +7,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import type { Lead, User } from "@shared/schema";
 
 import {
   Dialog,
@@ -79,12 +80,12 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
   const { user } = useAuth();
   
   // Fetch leads for dropdown
-  const { data: leads = [] } = useQuery({
+  const { data: leads = [] } = useQuery<Lead[]>({
     queryKey: ["/api/leads"],
   });
-  
+
   // Fetch users for caller assignment
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/team"],
   });
   
@@ -131,7 +132,7 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
         assignedCallerId: callData.assignedCallerId,
         scheduledTime: scheduledDate.toISOString(),
         status: callData.status || "pending",
-        notes: callData.notes || ""
+        notes: callData.notes ?? "",
       };
       
       console.log("Sending scheduled call data:", payload);
@@ -176,7 +177,7 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
   };
   
   // Generate hour options (1-12)
-  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(1, '0'));
+  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, "0"));
   
   // Generate minute options (00, 15, 30, 45)
   const minutes = ["00", "15", "30", "45"];
@@ -213,7 +214,7 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {leads.map(lead => (
+                      {leads.map((lead) => (
                         <SelectItem key={lead.id} value={lead.id.toString()}>
                           {lead.ownerName} - {lead.propertyAddress}
                         </SelectItem>
@@ -241,15 +242,15 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users && users.length > 0 ? (
-                        users.map(user => (
-                          <SelectItem key={user.id} value={user.id.toString()}>
-                            {user.username || user.name || `User ${user.id}`}
+                      {users.length > 0 ? (
+                        users.map((teamMember) => (
+                          <SelectItem key={teamMember.id} value={teamMember.id.toString()}>
+                            {teamMember.username || teamMember.name || `User ${teamMember.id}`}
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value={user ? user.id.toString() : "1"}>
-                          {user ? user.username : "Current User"}
+                        <SelectItem value={(user?.id ?? 0).toString()}>
+                          {user?.username ?? user?.name ?? "Current User"}
                         </SelectItem>
                       )}
                     </SelectContent>
@@ -389,10 +390,11 @@ export function ScheduleCallDialog({ open, onOpenChange }: ScheduleCallDialogPro
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Call preparation notes or agenda" 
-                      className="resize-none" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Call preparation notes or agenda"
+                      className="resize-none"
+                      {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

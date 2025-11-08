@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Call, ScheduledCall, Lead } from "@shared/schema";
-import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ScheduledCallsTable } from "@/components/calls/scheduled-calls-table";
 import { CallHistoryTable } from "@/components/calls/call-history-table";
@@ -72,8 +71,6 @@ export default function CallsPage() {
   
   return (
     <div className="flex h-screen bg-neutral-50">
-      <Sidebar />
-      
       <main className="main-content flex-1 md:ml-64 min-h-screen p-4 md:p-6 overflow-auto">
         <PageHeader
           title="Calls"

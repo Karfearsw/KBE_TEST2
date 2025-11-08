@@ -2,12 +2,12 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertLeadSchema } from "@shared/schema";
 import { X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getQueryFn } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import type { User } from "@shared/schema";
 
 import {
   Dialog,
@@ -72,7 +72,8 @@ const simpleLeadSchema = z.object({
 });
 
 // Use our simple schema for type derivation
-type AddLeadFormValues = z.infer<typeof simpleLeadSchema>;
+type AddLeadFormValues = z.input<typeof simpleLeadSchema>;
+type AddLeadSubmission = z.infer<typeof simpleLeadSchema>;
 
 interface AddLeadDialogProps {
   open: boolean;
@@ -84,14 +85,14 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
   const queryClient = useQueryClient();
   
   // Fetch users for assignment dropdown
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/team"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
   
   // Setup form with zod schema - explicitly add types to match schema
   const form = useForm<AddLeadFormValues>({
-    resolver: zodResolver(simpleLeadSchema),
+    resolver: zodResolver(simpleLeadSchema, undefined, { raw: true }),
     mode: "onChange", // Validate on change for better feedback
     defaultValues: {
       propertyAddress: "",
@@ -118,19 +119,10 @@ export function AddLeadDialog({ open, onOpenChange }: AddLeadDialogProps) {
   // Create lead mutation
   const createLeadMutation = useMutation({
     mutationFn: async (data: AddLeadFormValues) => {
-      // Ensure numeric fields are properly handled
       console.log('Lead submission data:', data);
-      
-      const processedData = {
-        ...data,
-        // Convert string values to numbers where needed
-        arv: data.arv ? Number(data.arv) : undefined,
-        repairCost: data.repairCost ? Number(data.repairCost) : undefined,
-        estimatedValue: data.estimatedValue ? Number(data.estimatedValue) : undefined,
-        latitude: data.latitude ? Number(data.latitude) : undefined,
-        longitude: data.longitude ? Number(data.longitude) : undefined,
-      };
-      
+
+      const processedData: AddLeadSubmission = simpleLeadSchema.parse(data);
+
       console.log('Processed lead data:', processedData);
       const res = await apiRequest("POST", "/api/leads", processedData);
       return res.json();

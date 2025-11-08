@@ -30,12 +30,14 @@ export function setupWebsocketServer(httpServer: Server) {
     ws.on('message', (message) => {
       try {
         const parsedMessage = JSON.parse(message.toString()) as WSMessage;
-        
+
         // Handle authentication
         if (parsedMessage.type === 'auth' && parsedMessage.data.userId) {
           userId = parsedMessage.data.userId.toString();
-          clients.set(userId, ws);
-          console.log(`User ${userId} authenticated on WebSocket`);
+          if (userId) {
+            clients.set(userId, ws);
+            console.log(`User ${userId} authenticated on WebSocket`);
+          }
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);

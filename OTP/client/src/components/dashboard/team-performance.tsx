@@ -27,12 +27,18 @@ export function TeamPerformance() {
   const { data: teamMembers = [] } = useQuery<TeamMemberWithStats[]>({
     queryKey: ["/api/team"],
   });
-  
+
   // Helper to get initials from name
-  const getInitials = (name: string) => {
-    return name.split(' ')
-      .map(part => part[0])
-      .join('')
+  const getInitials = (name?: string | null) => {
+    if (!name) {
+      return "--";
+    }
+
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
@@ -86,9 +92,9 @@ export function TeamPerformance() {
                   <tr key={member.id} className="hover:bg-neutral-50">
                     <td className="flex items-center">
                       <div className="flex-shrink-0 h-8 w-8 rounded-full bg-neutral-200 flex items-center justify-center">
-                        <span className="text-xs font-medium">{getInitials(member.name)}</span>
+                        <span className="text-xs font-medium">{getInitials(member.name ?? member.username)}</span>
                       </div>
-                      <span className="ml-3 font-medium text-neutral-900">{member.name}</span>
+                      <span className="ml-3 font-medium text-neutral-900">{member.name ?? member.username}</span>
                     </td>
                     <td className="capitalize">{member.role}</td>
                     <td>{member.stats.totalCalls}</td>

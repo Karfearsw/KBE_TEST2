@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { useQuery } from "@tanstack/react-query";
 import { Lead } from "@shared/schema";
@@ -116,7 +115,7 @@ function MapCenter({ coordinates }: { coordinates: [number, number] | null }) {
       });
     }
   }, [coordinates, map]);
-  
+
   return null;
 }
 
@@ -127,6 +126,28 @@ export default function MapPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapView, setMapView] = useState<"split" | "fullscreen">("split");
+
+  const parseCoordinate = useMemo(
+    () =>
+      (value: unknown): number | null => {
+        if (typeof value === "number") {
+          return Number.isFinite(value) ? value : null;
+        }
+
+        if (typeof value === "string") {
+          const trimmed = value.trim();
+          if (!trimmed) {
+            return null;
+          }
+
+          const parsed = Number(trimmed);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        return null;
+      },
+    []
+  );
   
   // Fetch leads for displaying on the map
   const { data: leads = [] } = useQuery<Lead[]>({
@@ -134,7 +155,7 @@ export default function MapPage() {
   });
   
   // Filter leads based on status and search query
-  const filteredLeads = leads.filter(lead => {
+  const filteredLeads = leads.filter((lead) => {
     // Status filter
     if (statusFilter !== "all" && lead.status !== statusFilter) {
       return false;
@@ -157,9 +178,11 @@ export default function MapPage() {
   
   // Center map on clicked lead
   const handleCenterMap = (lead: Lead) => {
-    if (lead.latitude && lead.longitude) {
-      // Ensure coordinates are in the correct format (latitude, longitude)
-      setCenterCoordinates([lead.latitude, lead.longitude]);
+    const latitude = parseCoordinate(lead.latitude);
+    const longitude = parseCoordinate(lead.longitude);
+
+    if (latitude !== null && longitude !== null) {
+      setCenterCoordinates([latitude, longitude]);
       setSelectedLead(lead);
     }
   };
@@ -171,8 +194,6 @@ export default function MapPage() {
   
   return (
     <div className="flex h-screen bg-neutral-50 dark:bg-neutral-900">
-      <Sidebar />
-      
       <main className="main-content flex-1 min-h-screen p-4 md:ml-64 md:p-6 overflow-auto">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -258,13 +279,14 @@ export default function MapPage() {
                   />
                   <ZoomControl position="bottomright" />
                   {filteredLeads.map((lead) => {
-                    // Check if lead has coordinates
-                    if (lead.latitude && lead.longitude) {
-                      // For map markers, Leaflet expects coordinates as [latitude, longitude]
+                    const latitude = parseCoordinate(lead.latitude);
+                    const longitude = parseCoordinate(lead.longitude);
+
+                    if (latitude !== null && longitude !== null) {
                       return (
                         <Marker
                           key={lead.id}
-                          position={[lead.latitude, lead.longitude]} 
+                          position={[latitude, longitude]}
                           icon={getMarkerIcon(lead.status || "new")}
                         >
                           <Popup>
