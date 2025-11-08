@@ -22,9 +22,9 @@ export function generateTwilioToken(identity: string): string {
     // Create a properly typed Twilio AccessToken
     const AccessToken = twilio.jwt.AccessToken;
     // TwiML App SID must be provided via env vars
-    const twimlAppSid = process.env.TWILIO_TWIML_APP_SID;
+    const twimlAppSid = process.env.TWILIO_TWIML_APP_SID || process.env.TWILIO_APP_SID;
     if (!twimlAppSid) {
-      throw new Error('Missing TWILIO_TWIML_APP_SID environment variable.');
+      throw new Error('Missing TWILIO_TWIML_APP_SID (or TWILIO_APP_SID) environment variable.');
     }
     
     // Create an access token with specified identity
