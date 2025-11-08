@@ -7,11 +7,12 @@ your PostgreSQL database.
 
 ## 1. Project settings
 
-When connecting the repository, set the Vercel **Root Directory** to `OTP/` so the
-platform can find `package.json`. Leave the **Framework Preset** as **Other**—the
-checked-in `vercel.json` already sets `framework: null`, which bypasses the
-automatic Next.js detection that otherwise causes the "No Next.js version
-detected" build failure.
+The repository now ships with a root-level `vercel.json` that changes into the
+`OTP/` folder for both the install and build steps, so you can leave Vercel's
+**Root Directory** blank (or explicitly set it to the repository root). The same
+file pins the **Framework Preset** to **Vite**, which stops the platform from
+trying to auto-detect Next.js and eliminates the "No Next.js version detected"
+build failure.
 
 ## 2. Build output
 

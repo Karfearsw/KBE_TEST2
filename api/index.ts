@@ -1,4 +1,4 @@
-import app from "../server/index";
+import app from "../OTP/server/index";
 
 export const config = {
   runtime: "nodejs20.x",

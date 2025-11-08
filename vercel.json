@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "framework": "vite",
+  "installCommand": "cd OTP && npm install",
+  "buildCommand": "cd OTP && npm run build",
+  "outputDirectory": "OTP/server/public",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "OTP/server/public/**"
+    }
+  }
+}
