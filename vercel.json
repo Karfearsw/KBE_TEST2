@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "framework": "vite",
+  "framework": null,
   "installCommand": "cd OTP && npm install",
   "buildCommand": "cd OTP && npm run build",
   "outputDirectory": "OTP/server/public",
