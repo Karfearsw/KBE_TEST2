@@ -1,8 +1,7 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { setupAuth, hashPassword } from "./auth";
 import { storage } from "./storage";
-import { setupWebsocketServer, broadcastMessage } from "./websocket";
+import { broadcastMessage } from "./websocket";
 import { generateTwilioToken, createVoiceResponse, getTwilioClient } from "./twilio";
 import twilio from 'twilio';
 import { generateLeadId, extractLeadNumber } from "./utils/lead-utils";
@@ -16,16 +15,10 @@ import {
   insertTimesheetSchema
 } from "@shared/schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export function registerRoutes(app: Express): void {
   // Setup authentication routes
   setupAuth(app);
-  
-  // Create HTTP server
-  const httpServer = createServer(app);
-  
-  // Setup WebSocket server
-  const wss = setupWebsocketServer(httpServer);
-  
+
   // API routes - all routes are prefixed with /api
   
   // Leads routes
@@ -1193,5 +1186,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  return httpServer;
 }
