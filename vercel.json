@@ -9,7 +9,10 @@
   ],
   "functions": {
     "api/index.ts": {
-      "includeFiles": "OTP/server/public/**"
+      "includeFiles": [
+        "OTP/server/public/**",
+        "OTP/dist/**"
+      ]
     }
   }
 }

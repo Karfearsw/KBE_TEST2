@@ -16,8 +16,10 @@ build failure.
 
 ## 2. Build output
 
-The Vite client build emits into `server/public`, and the Vercel function includes
-those files automatically. Keep the default `npm run build` command so that `vite`
+The Vite client build emits into `server/public`, and the Vercel function bundles
+those files automatically. The same build command also runs the `esbuild` step
+that produces the server bundle in `dist/`, which is now packaged with the
+serverless function. Keep the default `npm run build` command so that `vite`
 finishes before the server bundle is produced.
 
 ## 3. Environment variables
