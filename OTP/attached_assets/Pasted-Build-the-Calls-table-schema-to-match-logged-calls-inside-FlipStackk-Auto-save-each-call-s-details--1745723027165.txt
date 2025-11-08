@@ -1,0 +1,77 @@
+Build the Calls table schema to match logged calls inside FlipStackk
+
+Auto-save each call's details (outcome, duration, notes)
+
+Add Call History on each Lead Profile pageYou are a professional Replit AI Developer.
+
+Build a full working project called "FlipStackk Call Dialer MVP" with the following specs:
+
+---
+GENERAL PROJECT SETUP
+- Create a project structure with two folders: /backend and /frontend
+- Use TypeScript for both backend and frontend
+- Add a .env file to securely manage secrets (Replit Secrets tab compatible)
+
+---
+BACKEND REQUIREMENTS (inside /backend)
+- Use Express.js with TypeScript
+- Create a GET endpoint at `/api/token`
+- Use Twilio's Node.js JWT package to generate Voice Access Tokens
+- Token should be valid for outgoing calls using a Twilio App SID
+- Use dotenv to load secrets:
+  - TWILIO_ACCOUNT_SID
+  - TWILIO_API_KEY
+  - TWILIO_API_SECRET
+  - TWILIO_APP_SID
+- Add CORS middleware to allow frontend access
+- Server should run on PORT 3000
+
+---
+FRONTEND REQUIREMENTS (inside /frontend)
+- Use React with TypeScript and TailwindCSS
+- Install and configure Twilio Voice SDK (`@twilio/voice-sdk`)
+- Create a `CallDialer.tsx` component with:
+  - An input field for the phone number
+  - A "Call" button that connects using Twilio Device
+  - Basic Tailwind styling with FlipStackk theme colors (Red, White, Black)
+- On page load, fetch `/api/token` to initialize Twilio Device
+- On button click, start an outgoing call to the inputted number
+- Log call connection status in the browser console
+
+---
+EXTRA SETUP
+- Create a replit.nix file or use replit's built-in package manager
+- Install required dependencies:
+  - express
+  - dotenv
+  - twilio
+  - cors
+  - react
+  - react-dom
+  - typescript
+  - tailwindcss
+  - @twilio/voice-sdk
+
+---
+TAILWIND THEME COLORS
+- primary: #FF533E (red)
+- background: #FFFFFF (white)
+- accent: #000000 (black)
+
+---
+ENVIRONMENT VARIABLES NEEDED
+- TWILIO_ACCOUNT_SID
+- TWILIO_API_KEY
+- TWILIO_API_SECRET
+- TWILIO_APP_SID
+- JWT_SECRET (for future auth)
+
+---
+GOAL
+Deploy a working web app where users can:
+- Enter a phone number
+- Click Call
+- Connect live calls through Twilio using a Replit backend
+- No authentication or database is needed yet — just core calling MVP.
+
+Name the project: FlipStackk-CallDialer

@@ -1,0 +1,1 @@
+console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
