@@ -1,26 +1,15 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd OTP && npm run vercel-build",
+  "outputDirectory": "OTP/dist/public",
+  "installCommand": "cd OTP && npm install",
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/public"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/[[...path]].ts"
+      "source": "/api/(.*)",
+      "destination": "/api/[[...path]].ts"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
