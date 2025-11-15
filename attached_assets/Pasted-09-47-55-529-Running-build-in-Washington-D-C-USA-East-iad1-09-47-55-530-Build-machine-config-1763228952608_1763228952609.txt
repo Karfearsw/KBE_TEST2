@@ -1,0 +1,37 @@
+09:47:55.529 Running build in Washington, D.C., USA (East) – iad1
+09:47:55.530 Build machine configuration: 2 cores, 8 GB
+09:47:56.043 Cloning github.com/Karfearsw/KBE_TEST2 (Branch: main, Commit: bc99b86)
+09:47:56.044 Previous build caches not available.
+09:47:59.099 Cloning completed: 3.056s
+09:47:59.507 Running "vercel build"
+09:47:59.979 Vercel CLI 48.10.2
+09:48:00.584 Running "install" command: `cd OTP && npm install`...
+09:48:04.640 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+09:48:10.193 
+09:48:10.194 added 454 packages, and audited 455 packages in 9s
+09:48:10.195 
+09:48:10.195 62 packages are looking for funding
+09:48:10.195   run `npm fund` for details
+09:48:10.215 
+09:48:10.215 7 vulnerabilities (3 low, 2 moderate, 1 high, 1 critical)
+09:48:10.216 
+09:48:10.216 To address all issues, run:
+09:48:10.216   npm audit fix
+09:48:10.216 
+09:48:10.216 Run `npm audit` for details.
+09:48:10.464 
+09:48:10.467 > rest-express@1.0.0 vercel-build
+09:48:10.467 > vite build
+09:48:10.467 
+09:48:10.689 [31mfailed to load config from /vercel/path0/OTP/vite.config.ts[39m
+09:48:10.689 [31merror during build:
+09:48:10.690 Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /vercel/path0/OTP/vite.config.ts.timestamp-1763228890682-7bb7cc5fb0c7c.mjs
+09:48:10.690     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:314:9)
+09:48:10.690     at packageResolve (node:internal/modules/esm/resolve:767:81)
+09:48:10.690     at moduleResolve (node:internal/modules/esm/resolve:853:18)
+09:48:10.690     at defaultResolve (node:internal/modules/esm/resolve:983:11)
+09:48:10.690     at #cachedDefaultResolve (node:internal/modules/esm/loader:731:20)
+09:48:10.690     at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+09:48:10.691     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:310:38)
+09:48:10.691     at ModuleJob._link (node:internal/modules/esm/module_job:182:49)[39m
+09:48:10.705 Error: Command "cd OTP && npm run vercel-build" exited with 1
