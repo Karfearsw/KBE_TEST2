@@ -1,0 +1,37 @@
+10:17:25.204 Running build in Washington, D.C., USA (East) – iad1
+10:17:25.205 Build machine configuration: 2 cores, 8 GB
+10:17:25.214 Cloning github.com/Karfearsw/KBE_TEST2 (Branch: main, Commit: f2106a1)
+10:17:25.215 Skipping build cache, deployment was triggered without cache.
+10:17:27.266 Cloning completed: 2.052s
+10:17:27.822 Running "vercel build"
+10:17:28.505 Vercel CLI 48.10.2
+10:17:29.302 Running "install" command: `npm install`...
+10:17:34.118 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+10:17:39.650 
+10:17:39.652 added 454 packages, and audited 455 packages in 10s
+10:17:39.654 
+10:17:39.655 62 packages are looking for funding
+10:17:39.655   run `npm fund` for details
+10:17:39.677 
+10:17:39.678 7 vulnerabilities (3 low, 2 moderate, 1 high, 1 critical)
+10:17:39.678 
+10:17:39.678 To address all issues, run:
+10:17:39.679   npm audit fix
+10:17:39.679 
+10:17:39.679 Run `npm audit` for details.
+10:17:40.057 
+10:17:40.058 > rest-express@1.0.0 vercel-build
+10:17:40.058 > vite build
+10:17:40.059 
+10:17:40.287 [31mfailed to load config from /vercel/path0/OTP/vite.config.ts[39m
+10:17:40.287 [31merror during build:
+10:17:40.288 Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /vercel/path0/OTP/vite.config.ts.timestamp-1763230660280-8b7db2d3cd563.mjs
+10:17:40.288     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:314:9)
+10:17:40.288     at packageResolve (node:internal/modules/esm/resolve:767:81)
+10:17:40.288     at moduleResolve (node:internal/modules/esm/resolve:853:18)
+10:17:40.289     at defaultResolve (node:internal/modules/esm/resolve:983:11)
+10:17:40.289     at #cachedDefaultResolve (node:internal/modules/esm/loader:731:20)
+10:17:40.289     at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+10:17:40.289     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:310:38)
+10:17:40.289     at ModuleJob._link (node:internal/modules/esm/module_job:182:49)[39m
+10:17:40.305 Error: Command "npm run vercel-build" exited with 1
